@@ -120,6 +120,46 @@ table(dados_sim_2$IDADE, useNA = "always")
 # ATENçÃO: 1. Na hora de escrever os labels, somente a PRIMEIRA LETRA da legenda é maiúscula. Exemplo para SEXO: Feminino e Masculino
 #          2. Nesta Tarefa 6 não crie novas variáveis dentro do banco de dados
 
+# TIPOBITO
+dados_sim_2$TIPOBITO <- factor(dados_sim_2$TIPOBITO, 
+                               levels = c(1, 2), 
+                               labels = c("Fetal", "Não fetal"))
+
+# SEXO
+dados_sim_2$SEXO <- factor(dados_sim_2$SEXO, 
+                           levels = c(1, 2), 
+                           labels = c("Masculino", "Feminino"))
+
+# RACACOR
+dados_sim_2$RACACOR <- factor(dados_sim_2$RACACOR, 
+                              levels = c(1, 2, 3, 4, 5), 
+                              labels = c("Branca", "Preta", "Amarela", "Parda", "Indígena"))
+
+# ESC2010
+dados_sim_2$ESC2010 <- factor(dados_sim_2$ESC2010, 
+                              levels = c(0, 1, 2, 3, 4, 5), 
+                              labels = c("Sem escolaridade", 
+                                         "Fundamental I", 
+                                         "Fundamental II", 
+                                         "Médio", 
+                                         "Superior incompleto", 
+                                         "Superior completo"))
+
+# TPMORTEOCO
+dados_sim_2$TPMORTEOCO <- factor(dados_sim_2$TPMORTEOCO, 
+                                 levels = c(1, 2, 3, 4, 5, 8), 
+                                 labels = c("Na gravidez", 
+                                            "No parto", 
+                                            "No abortamento", 
+                                            "Até 42 dias após o término do parto", 
+                                            "De 43 dias a 1 ano após o término da gestação", 
+                                            "Não ocorreu nestes períodos"))
+
+# Verificar se as legendas foram aplicadas corretamente
+table(dados_sim_2$SEXO, useNA = "always")
+table(dados_sim_2$RACACOR, useNA = "always")
+table(dados_sim_2$ESC2010, useNA = "always")
+table(dados_sim_2$TPMORTEOCO, useNA = "always")
 
 # Ao terminar a Tarefa 6 commit com a mensagem "script BDEM - SIM - tarefas 1 a 6" e envie para o repositório Projeto_BDEM_2016
 
