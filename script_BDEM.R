@@ -85,6 +85,31 @@ table(dados_sim_2$IDADE, useNA = "ifany")
 # Verifique o dicionário do SIM para identificar qual o código das categorias de cada variável
 # Em variáveis quantitativas como IDADE verificar se existem valores como 9999 para NA
 
+# SEXO (0 e 9 representam Ignorado)
+dados_sim_2$SEXO[dados_sim_2$SEXO %in% c("0", "9", 0, 9)] <- NA
+
+# RACACOR (9 representa Ignorado)
+dados_sim_2$RACACOR[dados_sim_2$RACACOR %in% c("9", 9)] <- NA
+
+# ESC2010 (9 representa Ignorado)
+dados_sim_2$ESC2010[dados_sim_2$ESC2010 %in% c("9", 9)] <- NA
+
+# TPMORTEOCO (9 representa Ignorado)
+dados_sim_2$TPMORTEOCO[dados_sim_2$TPMORTEOCO %in% c("9", 9)] <- NA
+
+# IDADE (999 e 9 representam Ignorado)
+dados_sim_2$IDADE[dados_sim_2$IDADE %in% c("999", "9", 999, 9)] <- NA
+
+# TIPOBITO (9 representa Ignorado, se houver)
+dados_sim_2$TIPOBITO[dados_sim_2$TIPOBITO %in% c("9", 9)] <- NA
+
+# Confirmação: Verificar se os valores 9 / 0 sumiram e viraram NA
+table(dados_sim_2$SEXO, useNA = "always")
+table(dados_sim_2$RACACOR, useNA = "always")
+table(dados_sim_2$ESC2010, useNA = "always")
+table(dados_sim_2$TPMORTEOCO, useNA = "always")
+table(dados_sim_2$TIPOBITO, useNA = "always")
+table(dados_sim_2$IDADE, useNA = "always")
 
 # Ao terminar a Tarefa 5 commit com a mensagem "script BDEM - SIM - tarefas 1 a 5" e envie para o repositório Projeto_BDEM_2016
 
