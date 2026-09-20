@@ -907,6 +907,72 @@ dados_sinasc_2$KOTELCHUCK <- factor(dados_sinasc_2$KOTELCHUCK,
 # nova variável: dados_sinasc_2$ESTCIV: Sem companheiro: ESTCIVMAE 1, 3 ou 4, Com companheiro: ESTCIVMAE 2 ou 5
 # Ao categorizar as variáveis, garantir que sejam transformadas em tipo fator
 
+# Categorizar PESO
+dados_sinasc_2$F_PESO <- cut(
+  dados_sinasc_2$PESO,
+  breaks = c(-Inf, 2500, 4000, Inf),
+  right = FALSE,
+  labels = c("Baixo peso", "Peso normal", "Macrossomia")
+)
+
+# Categorizar IDADEMAE
+dados_sinasc_2$F_IDADE <- cut(
+  dados_sinasc_2$IDADEMAE,
+  breaks = c(-Inf, 15, 20, 25, 30, 35, 40, 45, 50, Inf),
+  right = FALSE,
+  labels = c("<15", "15-19", "20-24", "25-29", "30-34",
+             "35-39", "40-44", "45-49", "50+")
+)
+
+# Categorizar APGAR5
+dados_sinasc_2$F_APGAR5 <- cut(
+  dados_sinasc_2$APGAR5,
+  breaks = c(-Inf, 7, Inf),
+  right = FALSE,
+  labels = c("Baixo", "Normal")
+)
+
+# Criar variável de peregrinação
+dados_sinasc_2$PEREG <- factor(
+  ifelse(
+    is.na(dados_sinasc_2$CODMUNNASC) | is.na(dados_sinasc_2$CODMUNRES),
+    NA,
+    ifelse(
+      as.character(dados_sinasc_2$CODMUNNASC) ==
+        as.character(dados_sinasc_2$CODMUNRES),
+      "Não",
+      "Sim"
+    )
+  ),
+  levels = c("Não", "Sim")
+)
+
+# Criar variável de estado civil
+dados_sinasc_2$ESTCIV <- factor(
+  ifelse(
+    is.na(dados_sinasc_2$ESTCIVMAE),
+    NA,
+    ifelse(
+      as.character(dados_sinasc_2$ESTCIVMAE) %in%
+        c("Solteira", "Viúva", "Separada judicialmente/divorciada"),
+      "Sem companheiro",
+      ifelse(
+        as.character(dados_sinasc_2$ESTCIVMAE) %in%
+          c("Casada", "União estável"),
+        "Com companheiro",
+        NA
+      )
+    )
+  ),
+  levels = c("Sem companheiro", "Com companheiro")
+)
+
+# Verificar as novas variáveis
+table(dados_sinasc_2$F_PESO, useNA = "ifany")
+table(dados_sinasc_2$F_IDADE, useNA = "ifany")
+table(dados_sinasc_2$F_APGAR5, useNA = "ifany")
+table(dados_sinasc_2$PEREG, useNA = "ifany")
+table(dados_sinasc_2$ESTCIV, useNA = "ifany")
 
 # Ao terminar a Tarefa 7 commit com a mensagem "script BDEM - SINASC - tarefas 1 a 7" e envie para o repositório Projeto_BDEM_2016
 
