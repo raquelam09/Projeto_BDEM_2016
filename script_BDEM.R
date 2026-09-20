@@ -687,6 +687,15 @@ dim(dados_sinasc_1)
 # 41: 155066    42: 95313     43: 141411
 # 50: 42432     51: 53531     52: 95563     53: 43340 
 
+# Criar dados_sinasc_2 filtrando apenas o estado de SP (código 35)
+dados_sinasc_2 <- subset(
+  dados_sinasc_1,
+  substr(as.character(CODMUNRES), 1, 2) == "35"
+)
+
+# Verificar se o banco de dados ficou com os 601.437 nascimentos de SP esperados
+nrow(dados_sinasc_2)
+
 
 # Ao terminar a Tarefa 3 commit com a mensagem "script BDEM - SINASC - tarefas 1 a 3" e envie para o repositório Projeto_BDEM_2016
 
