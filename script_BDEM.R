@@ -175,406 +175,449 @@ dados <- dados_sim_2
 # Identificadores
 ANO <- 2016
 NIVEL <- "UF"
-CODMUNRES <- "35"
 
 
-# Informações gerais
-
-TO <- nrow(dados)
-
-TORC <- sum(complete.cases(dados_sim))
+# Criar uma lista com os municípios de SP
+municipios <- sort(unique(dados$CODMUNRES))
 
 
-# Total de óbitos com registros completos nas 14 variáveis selecionadas
-# Substituir pelas 14 variáveis indicadas no roteiro
-TORCR <- NA
-
-
-# Causas externas
-TO_NN <- sum(
-  substr(as.character(dados$CAUSABAS), 1, 1) %in% c("V", "W", "X", "Y"),
-  na.rm = TRUE
-)
-
-
-# Causas naturais
-TO_N <- sum(
-  !substr(as.character(dados$CAUSABAS), 1, 1) %in% c("V", "W", "X", "Y"),
-  na.rm = TRUE
-)
-
-
-# Doenças infecciosas e parasitárias
-TO_CB_I <- sum(
-  substr(as.character(dados$CAUSABAS), 1, 1) %in% c("A", "B"),
-  na.rm = TRUE
-)
-
-
-# Neoplasias e doenças do sangue
-TO_CB_N <- sum(
-  substr(as.character(dados$CAUSABAS), 1, 1) %in% c("C", "D"),
-  na.rm = TRUE
-)
-
-
-# Doenças do aparelho circulatório
-TO_CB_C <- sum(
-  substr(as.character(dados$CAUSABAS), 1, 1) == "I",
-  na.rm = TRUE
-)
-
-
-# Doenças do aparelho respiratório
-TO_CB_R <- sum(
-  substr(as.character(dados$CAUSABAS), 1, 1) == "J",
-  na.rm = TRUE
-)
-
-
-# Outras causas naturais
-TO_CB_O <- TO_N - TO_CB_I - TO_CB_N - TO_CB_C - TO_CB_R
-
-
-# Sexo
-TO_M <- sum(
-  dados$SEXO == "Masculino",
-  na.rm = TRUE
-)
-
-TO_F <- sum(
-  dados$SEXO == "Feminino",
-  na.rm = TRUE
-)
-
-
-# Idade em anos
-idade <- as.character(dados$IDADE)
-
-idade_anos <- ifelse(
-  substr(idade, 1, 1) == "4",
-  as.numeric(substr(idade, 2, 3)),
-  NA
-)
-
-
-# Mulheres em idade fértil
-TO_F_IF <- sum(
-  dados$SEXO == "Feminino" &
-    idade_anos >= 15 &
-    idade_anos <= 49,
-  na.rm = TRUE
-)
-
-
-# Óbitos fetais
-TO_FT <- sum(
-  dados$TIPOBITO == "Fetal",
-  na.rm = TRUE
-)
-
-
-# Idade em dias
-# 1 = minutos
-# 2 = horas
-# 3 = dias
-# 4 = meses
-# 5 = anos
-
-unidade <- substr(idade, 1, 1)
-valor_idade <- as.numeric(substr(idade, 2, 3))
-
-idade_dias <- ifelse(
-  unidade == "1", valor_idade / (60 * 24),
-  ifelse(
-    unidade == "2", valor_idade / 24,
+# Função para calcular os indicadores de cada município
+calcular_municipio <- function(municipio) {
+  
+  # Selecionar apenas os óbitos do município
+  dados_mun <- subset(dados, CODMUNRES == municipio)
+  
+  
+  # Identificadores
+  CODMUNRES <- as.character(municipio)
+  
+  
+  # Informações gerais
+  
+  TO <- nrow(dados_mun)
+  
+  TORC <- sum(complete.cases(dados_mun))
+  
+  
+  # Total de óbitos com registros completos nas 14 variáveis selecionadas
+  # Substituir pelas 14 variáveis indicadas no roteiro
+  TORCR <- NA
+  
+  
+  # Causas externas
+  TO_NN <- sum(
+    substr(as.character(dados_mun$CAUSABAS), 1, 1) %in% c("V", "W", "X", "Y"),
+    na.rm = TRUE
+  )
+  
+  
+  # Causas naturais
+  TO_N <- sum(
+    !substr(as.character(dados_mun$CAUSABAS), 1, 1) %in% c("V", "W", "X", "Y"),
+    na.rm = TRUE
+  )
+  
+  
+  # Doenças infecciosas e parasitárias
+  TO_CB_I <- sum(
+    substr(as.character(dados_mun$CAUSABAS), 1, 1) %in% c("A", "B"),
+    na.rm = TRUE
+  )
+  
+  
+  # Neoplasias e doenças do sangue
+  TO_CB_N <- sum(
+    substr(as.character(dados_mun$CAUSABAS), 1, 1) %in% c("C", "D"),
+    na.rm = TRUE
+  )
+  
+  
+  # Doenças do aparelho circulatório
+  TO_CB_C <- sum(
+    substr(as.character(dados_mun$CAUSABAS), 1, 1) == "I",
+    na.rm = TRUE
+  )
+  
+  
+  # Doenças do aparelho respiratório
+  TO_CB_R <- sum(
+    substr(as.character(dados_mun$CAUSABAS), 1, 1) == "J",
+    na.rm = TRUE
+  )
+  
+  
+  # Outras causas naturais
+  TO_CB_O <- TO_N - TO_CB_I - TO_CB_N - TO_CB_C - TO_CB_R
+  
+  
+  # Sexo
+  TO_M <- sum(
+    dados_mun$SEXO == "Masculino",
+    na.rm = TRUE
+  )
+  
+  TO_F <- sum(
+    dados_mun$SEXO == "Feminino",
+    na.rm = TRUE
+  )
+  
+  
+  # Idade em anos
+  idade <- as.character(dados_mun$IDADE)
+  
+  idade_anos <- ifelse(
+    substr(idade, 1, 1) == "4",
+    as.numeric(substr(idade, 2, 3)),
+    NA
+  )
+  
+  
+  # Mulheres em idade fértil
+  TO_F_IF <- sum(
+    dados_mun$SEXO == "Feminino" &
+      idade_anos >= 15 &
+      idade_anos <= 49,
+    na.rm = TRUE
+  )
+  
+  
+  # Óbitos fetais
+  TO_FT <- sum(
+    dados_mun$TIPOBITO == "Fetal",
+    na.rm = TRUE
+  )
+  
+  
+  # Idade em dias
+  # 1 = minutos
+  # 2 = horas
+  # 3 = dias
+  # 4 = meses
+  # 5 = anos
+  
+  unidade <- substr(idade, 1, 1)
+  valor_idade <- as.numeric(substr(idade, 2, 3))
+  
+  idade_dias <- ifelse(
+    unidade == "0", valor_idade / (60 * 24),
     ifelse(
-      unidade == "3", valor_idade,
+      unidade == "1", valor_idade / 24,
       ifelse(
-        unidade == "4", valor_idade * 30,
+        unidade == "2", valor_idade,
         ifelse(
-          unidade == "5", valor_idade * 365,
-          NA
+          unidade == "3", valor_idade * 30,
+          ifelse(
+            unidade == "4", valor_idade * 365,
+            ifelse(
+              unidade == "5", 101 * 365,
+              NA
+            )
+          )
         )
       )
     )
   )
+  
+  
+  # Óbitos neonatais
+  TO_NT <- sum(
+    dados_mun$TIPOBITO == "Não fetal" &
+      idade_dias >= 0 &
+      idade_dias <= 27,
+    na.rm = TRUE
+  )
+  
+  
+  # Neonatal precoce
+  TO_NT_P <- sum(
+    dados_mun$TIPOBITO == "Não fetal" &
+      idade_dias >= 0 &
+      idade_dias <= 6,
+    na.rm = TRUE
+  )
+  
+  
+  # Neonatal tardio
+  TO_NT_T <- sum(
+    dados_mun$TIPOBITO == "Não fetal" &
+      idade_dias >= 7 &
+      idade_dias <= 27,
+    na.rm = TRUE
+  )
+  
+  
+  # Pós-neonatal
+  TO_PNT <- sum(
+    dados_mun$TIPOBITO == "Não fetal" &
+      idade_dias >= 28 &
+      idade_dias <= 364,
+    na.rm = TRUE
+  )
+  
+  
+  # Óbitos neonatais por raça/cor
+  
+  TONT_B <- sum(
+    dados_mun$TIPOBITO == "Não fetal" &
+      dados_mun$RACACOR == "Branca" &
+      idade_dias >= 0 &
+      idade_dias <= 27,
+    na.rm = TRUE
+  )
+  
+  TONT_PT <- sum(
+    dados_mun$TIPOBITO == "Não fetal" &
+      dados_mun$RACACOR == "Preta" &
+      idade_dias >= 0 &
+      idade_dias <= 27,
+    na.rm = TRUE
+  )
+  
+  TONT_A <- sum(
+    dados_mun$TIPOBITO == "Não fetal" &
+      dados_mun$RACACOR == "Amarela" &
+      idade_dias >= 0 &
+      idade_dias <= 27,
+    na.rm = TRUE
+  )
+  
+  TONT_PD <- sum(
+    dados_mun$TIPOBITO == "Não fetal" &
+      dados_mun$RACACOR == "Parda" &
+      idade_dias >= 0 &
+      idade_dias <= 27,
+    na.rm = TRUE
+  )
+  
+  TONT_I <- sum(
+    dados_mun$TIPOBITO == "Não fetal" &
+      dados_mun$RACACOR == "Indígena" &
+      idade_dias >= 0 &
+      idade_dias <= 27,
+    na.rm = TRUE
+  )
+  
+  
+  # Informações maternas
+  
+  TO_MT_DG <- sum(
+    dados_mun$SEXO == "Feminino" &
+      dados_mun$TPMORTEOCO == "Na gravidez",
+    na.rm = TRUE
+  )
+  
+  TO_MT_PT <- sum(
+    dados_mun$SEXO == "Feminino" &
+      dados_mun$TPMORTEOCO == "No parto",
+    na.rm = TRUE
+  )
+  
+  TO_MT_AB <- sum(
+    dados_mun$SEXO == "Feminino" &
+      dados_mun$TPMORTEOCO == "No abortamento",
+    na.rm = TRUE
+  )
+  
+  TO_MT_42 <- sum(
+    dados_mun$SEXO == "Feminino" &
+      dados_mun$TPMORTEOCO == "Até 42 dias após o término do parto",
+    na.rm = TRUE
+  )
+  
+  TO_MT_43 <- sum(
+    dados_mun$SEXO == "Feminino" &
+      dados_mun$TPMORTEOCO == "De 43 dias a 1 ano após o término da gestação",
+    na.rm = TRUE
+  )
+  
+  
+  # Total de óbitos maternos
+  TO_MT <- sum(
+    dados_mun$SEXO == "Feminino" &
+      dados_mun$TPMORTEOCO %in% c(
+        "Na gravidez",
+        "No parto",
+        "No abortamento",
+        "Até 42 dias após o término do parto",
+        "De 43 dias a 1 ano após o término da gestação"
+      ),
+    na.rm = TRUE
+  )
+  
+  
+  # Óbitos maternos precoces
+  TO_MT_P <- sum(
+    dados_mun$SEXO == "Feminino" &
+      dados_mun$TPMORTEOCO %in% c(
+        "Na gravidez",
+        "No parto",
+        "No abortamento",
+        "Até 42 dias após o término do parto"
+      ),
+    na.rm = TRUE
+  )
+  
+  
+  # Óbitos maternos precoces em idade fértil
+  TO_MT_P_I <- sum(
+    dados_mun$SEXO == "Feminino" &
+      idade_anos >= 15 &
+      idade_anos <= 49 &
+      dados_mun$TPMORTEOCO %in% c(
+        "Na gravidez",
+        "No parto",
+        "No abortamento",
+        "Até 42 dias após o término do parto"
+      ),
+    na.rm = TRUE
+  )
+  
+  
+  # Óbitos maternos precoces por escolaridade
+  
+  TO_MT_P_ES <- sum(
+    dados_mun$SEXO == "Feminino" &
+      dados_mun$ESC2010 == "Sem escolaridade" &
+      dados_mun$TPMORTEOCO %in% c(
+        "Na gravidez",
+        "No parto",
+        "No abortamento",
+        "Até 42 dias após o término do parto"
+      ),
+    na.rm = TRUE
+  )
+  
+  TO_MT_P_EFI <- sum(
+    dados_mun$SEXO == "Feminino" &
+      dados_mun$ESC2010 == "Fundamental I" &
+      dados_mun$TPMORTEOCO %in% c(
+        "Na gravidez",
+        "No parto",
+        "No abortamento",
+        "Até 42 dias após o término do parto"
+      ),
+    na.rm = TRUE
+  )
+  
+  TO_MT_P_EFII <- sum(
+    dados_mun$SEXO == "Feminino" &
+      dados_mun$ESC2010 == "Fundamental II" &
+      dados_mun$TPMORTEOCO %in% c(
+        "Na gravidez",
+        "No parto",
+        "No abortamento",
+        "Até 42 dias após o término do parto"
+      ),
+    na.rm = TRUE
+  )
+  
+  TO_MT_P_EM <- sum(
+    dados_mun$SEXO == "Feminino" &
+      dados_mun$ESC2010 == "Médio" &
+      dados_mun$TPMORTEOCO %in% c(
+        "Na gravidez",
+        "No parto",
+        "No abortamento",
+        "Até 42 dias após o término do parto"
+      ),
+    na.rm = TRUE
+  )
+  
+  TO_MT_P_ESI <- sum(
+    dados_mun$SEXO == "Feminino" &
+      dados_mun$ESC2010 == "Superior incompleto" &
+      dados_mun$TPMORTEOCO %in% c(
+        "Na gravidez",
+        "No parto",
+        "No abortamento",
+        "Até 42 dias após o término do parto"
+      ),
+    na.rm = TRUE
+  )
+  
+  TO_MT_P_ESC <- sum(
+    dados_mun$SEXO == "Feminino" &
+      dados_mun$ESC2010 == "Superior completo" &
+      dados_mun$TPMORTEOCO %in% c(
+        "Na gravidez",
+        "No parto",
+        "No abortamento",
+        "Até 42 dias após o término do parto"
+      ),
+    na.rm = TRUE
+  )
+  
+  
+  # Banco final
+  
+  SIM_SP <- data.frame(
+    ANO = ANO,
+    NIVEL = NIVEL,
+    CODMUNRES = CODMUNRES,
+    TO = TO,
+    TORC = TORC,
+    TORCR = TORCR,
+    TO_NN = TO_NN,
+    TO_N = TO_N,
+    TO_CB_I = TO_CB_I,
+    TO_CB_N = TO_CB_N,
+    TO_CB_C = TO_CB_C,
+    TO_CB_R = TO_CB_R,
+    TO_CB_O = TO_CB_O,
+    TO_M = TO_M,
+    TO_F = TO_F,
+    TO_F_IF = TO_F_IF,
+    TO_FT = TO_FT,
+    TO_NT = TO_NT,
+    TO_NT_P = TO_NT_P,
+    TO_NT_T = TO_NT_T,
+    TO_PNT = TO_PNT,
+    TONT_B = TONT_B,
+    TONT_PT = TONT_PT,
+    TONT_A = TONT_A,
+    TONT_PD = TONT_PD,
+    TONT_I = TONT_I,
+    TO_MT = TO_MT,
+    TO_MT_DG = TO_MT_DG,
+    TO_MT_PT = TO_MT_PT,
+    TO_MT_AB = TO_MT_AB,
+    TO_MT_42 = TO_MT_42,
+    TO_MT_43 = TO_MT_43,
+    TO_MT_P = TO_MT_P,
+    TO_MT_P_I = TO_MT_P_I,
+    TO_MT_P_ES = TO_MT_P_ES,
+    TO_MT_P_EFI = TO_MT_P_EFI,
+    TO_MT_P_EFII = TO_MT_P_EFII,
+    TO_MT_P_EM = TO_MT_P_EM,
+    TO_MT_P_ESI = TO_MT_P_ESI,
+    TO_MT_P_ESC = TO_MT_P_ESC
+  )
+  
+  return(SIM_SP)
+}
+
+
+# Calcular os indicadores para todos os municípios
+SIM_SP <- do.call(rbind, lapply(municipios, calcular_municipio))
+
+
+# Transformar os nomes das linhas em sequência
+rownames(SIM_SP) <- NULL
+
+
+# Conferir o banco final
+dim(SIM_SP)
+head(SIM_SP)
+View(SIM_SP)
+
+
+# Salvar o banco de dados
+write.csv2(
+  SIM_SP,
+  "SIM_SP.csv",
+  row.names = FALSE
 )
 
-
-# Óbitos neonatais
-TO_NT <- sum(
-  dados$TIPOBITO == "Não fetal" &
-    idade_dias >= 0 &
-    idade_dias <= 27,
-  na.rm = TRUE
-)
-
-
-# Neonatal precoce
-TO_NT_P <- sum(
-  dados$TIPOBITO == "Não fetal" &
-    idade_dias >= 0 &
-    idade_dias <= 6,
-  na.rm = TRUE
-)
-
-
-# Neonatal tardio
-TO_NT_T <- sum(
-  dados$TIPOBITO == "Não fetal" &
-    idade_dias >= 7 &
-    idade_dias <= 27,
-  na.rm = TRUE
-)
-
-
-# Pós-neonatal
-TO_PNT <- sum(
-  dados$TIPOBITO == "Não fetal" &
-    idade_dias >= 28 &
-    idade_dias <= 364,
-  na.rm = TRUE
-)
-
-
-# Óbitos neonatais por raça/cor
-
-TONT_B <- sum(
-  dados$TIPOBITO == "Não fetal" &
-    dados$RACACOR == "Branca" &
-    idade_dias >= 0 &
-    idade_dias <= 27,
-  na.rm = TRUE
-)
-
-TONT_PT <- sum(
-  dados$TIPOBITO == "Não fetal" &
-    dados$RACACOR == "Preta" &
-    idade_dias >= 0 &
-    idade_dias <= 27,
-  na.rm = TRUE
-)
-
-TONT_A <- sum(
-  dados$TIPOBITO == "Não fetal" &
-    dados$RACACOR == "Amarela" &
-    idade_dias >= 0 &
-    idade_dias <= 27,
-  na.rm = TRUE
-)
-
-TONT_PD <- sum(
-  dados$TIPOBITO == "Não fetal" &
-    dados$RACACOR == "Parda" &
-    idade_dias >= 0 &
-    idade_dias <= 27,
-  na.rm = TRUE
-)
-
-TONT_I <- sum(
-  dados$TIPOBITO == "Não fetal" &
-    dados$RACACOR == "Indígena" &
-    idade_dias >= 0 &
-    idade_dias <= 27,
-  na.rm = TRUE
-)
-
-
-# Informações maternas
-
-TO_MT_DG <- sum(
-  dados$SEXO == "Feminino" &
-    dados$TPMORTEOCO == "Na gravidez",
-  na.rm = TRUE
-)
-
-TO_MT_PT <- sum(
-  dados$SEXO == "Feminino" &
-    dados$TPMORTEOCO == "No parto",
-  na.rm = TRUE
-)
-
-TO_MT_AB <- sum(
-  dados$SEXO == "Feminino" &
-    dados$TPMORTEOCO == "No abortamento",
-  na.rm = TRUE
-)
-
-TO_MT_42 <- sum(
-  dados$SEXO == "Feminino" &
-    dados$TPMORTEOCO == "Até 42 dias após o término do parto",
-  na.rm = TRUE
-)
-
-TO_MT_43 <- sum(
-  dados$SEXO == "Feminino" &
-    dados$TPMORTEOCO == "De 43 dias a 1 ano após o término da gestação",
-  na.rm = TRUE
-)
-
-
-# Total de óbitos maternos
-TO_MT <- sum(
-  dados$SEXO == "Feminino" &
-    dados$TPMORTEOCO %in% c(
-      "Na gravidez",
-      "No parto",
-      "No abortamento",
-      "Até 42 dias após o término do parto",
-      "De 43 dias a 1 ano após o término da gestação"
-    ),
-  na.rm = TRUE
-)
-
-
-# Óbitos maternos precoces
-TO_MT_P <- sum(
-  dados$SEXO == "Feminino" &
-    dados$TPMORTEOCO %in% c(
-      "Na gravidez",
-      "No parto",
-      "No abortamento",
-      "Até 42 dias após o término do parto"
-    ),
-  na.rm = TRUE
-)
-
-
-# Óbitos maternos precoces em idade fértil
-TO_MT_P_I <- sum(
-  dados$SEXO == "Feminino" &
-    idade_anos >= 15 &
-    idade_anos <= 49 &
-    dados$TPMORTEOCO %in% c(
-      "Na gravidez",
-      "No parto",
-      "No abortamento",
-      "Até 42 dias após o término do parto"
-    ),
-  na.rm = TRUE
-)
-
-
-# Óbitos maternos precoces por escolaridade
-
-TO_MT_P_ES <- sum(
-  dados$SEXO == "Feminino" &
-    dados$ESC2010 == "Sem escolaridade" &
-    dados$TPMORTEOCO %in% c(
-      "Na gravidez",
-      "No parto",
-      "No abortamento",
-      "Até 42 dias após o término do parto"
-    ),
-  na.rm = TRUE
-)
-
-TO_MT_P_EFI <- sum(
-  dados$SEXO == "Feminino" &
-    dados$ESC2010 == "Fundamental I" &
-    dados$TPMORTEOCO %in% c(
-      "Na gravidez",
-      "No parto",
-      "No abortamento",
-      "Até 42 dias após o término do parto"
-    ),
-  na.rm = TRUE
-)
-
-TO_MT_P_EFII <- sum(
-  dados$SEXO == "Feminino" &
-    dados$ESC2010 == "Fundamental II" &
-    dados$TPMORTEOCO %in% c(
-      "Na gravidez",
-      "No parto",
-      "No abortamento",
-      "Até 42 dias após o término do parto"
-    ),
-  na.rm = TRUE
-)
-
-TO_MT_P_EM <- sum(
-  dados$SEXO == "Feminino" &
-    dados$ESC2010 == "Médio" &
-    dados$TPMORTEOCO %in% c(
-      "Na gravidez",
-      "No parto",
-      "No abortamento",
-      "Até 42 dias após o término do parto"
-    ),
-  na.rm = TRUE
-)
-
-TO_MT_P_ESI <- sum(
-  dados$SEXO == "Feminino" &
-    dados$ESC2010 == "Superior incompleto" &
-    dados$TPMORTEOCO %in% c(
-      "Na gravidez",
-      "No parto",
-      "No abortamento",
-      "Até 42 dias após o término do parto"
-    ),
-  na.rm = TRUE
-)
-
-TO_MT_P_ESC <- sum(
-  dados$SEXO == "Feminino" &
-    dados$ESC2010 == "Superior completo" &
-    dados$TPMORTEOCO %in% c(
-      "Na gravidez",
-      "No parto",
-      "No abortamento",
-      "Até 42 dias após o término do parto"
-    ),
-  na.rm = TRUE
-)
-
-
-# Banco final
-
-SIM_SP <- data.frame(
-  ANO = ANO,
-  NIVEL = NIVEL,
-  CODMUNRES = CODMUNRES,
-  TO = TO,
-  TORC = TORC,
-  TORCR = TORCR,
-  TO_NN = TO_NN,
-  TO_N = TO_N,
-  TO_CB_I = TO_CB_I,
-  TO_CB_N = TO_CB_N,
-  TO_CB_C = TO_CB_C,
-  TO_CB_R = TO_CB_R,
-  TO_CB_O = TO_CB_O,
-  TO_M = TO_M,
-  TO_F = TO_F,
-  TO_F_IF = TO_F_IF,
-  TO_FT = TO_FT,
-  TO_NT = TO_NT,
-  TO_NT_P = TO_NT_P,
-  TO_NT_T = TO_NT_T,
-  TO_PNT = TO_PNT,
-  TONT_B = TONT_B,
-  TONT_PT = TONT_PT,
-  TONT_A = TONT_A,
-  TONT_PD = TONT_PD,
-  TONT_I = TONT_I,
-  TO_MT = TO_MT,
-  TO_MT_DG = TO_MT_DG,
-  TO_MT_PT = TO_MT_PT,
-  TO_MT_AB = TO_MT_AB,
-  TO_MT_42 = TO_MT_42,
-  TO_MT_43 = TO_MT_43,
-  TO_MT_P = TO_MT_P,
-  TO_MT_P_I = TO_MT_P_I,
-  TO_MT_P_ES = TO_MT_P_ES,
-  TO_MT_P_EFI = TO_MT_P_EFI,
-  TO_MT_P_EFII = TO_MT_P_EFII,
-  TO_MT_P_EM = TO_MT_P_EM,
-  TO_MT_P_ESI = TO_MT_P_ESI,
-  TO_MT_P_ESC = TO_MT_P_ESC
-)
   
 # Ao terminar a Tarefa 7 commit com a mensagem "script BDEM - SIM - tarefas 1 a 7" e envie para o repositório Projeto_BDEM_2016
 
