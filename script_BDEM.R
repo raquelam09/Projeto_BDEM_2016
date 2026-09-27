@@ -1042,6 +1042,788 @@ table(dados_sinasc_2$F_PIG, useNA = "ifany")
 # Atenção: a ordem das variáveis do arquivo deve ser respeitada
 
 
+# Base de SP
+dados <- dados_sinasc_2
+
+
+# Identificadores
+ANO <- 2016
+NIVEL <- "MUNICIPIO"
+
+
+# Criar uma lista com os municípios de SP
+municipios <- sort(unique(dados$CODMUNRES))
+
+
+# Função para calcular os indicadores de cada município
+calcular_municipio <- function(municipio) {
+  
+  # Selecionar apenas os nascimentos do município
+  dados_mun <- subset(dados, CODMUNRES == municipio)
+  
+  
+  # Identificadores
+  CODMUNRES <- as.character(municipio)
+  
+  
+  # ---------------------------------------------------------
+  # Informações sobre os nascimentos
+  # ---------------------------------------------------------
+  
+  TN <- nrow(dados_mun)
+  
+  
+  # Total de nascimentos com registros completos
+  # nas variáveis originais do SINASC
+  dados_orig_mun <- subset(
+    dados_sinasc,
+    CODMUNRES == municipio
+  )
+  
+  TNRC <- sum(complete.cases(dados_orig_mun))
+  
+  
+  # Total de nascimentos com registros completos
+  # nas variáveis selecionadas
+  TNRCR <- sum(
+    complete.cases(
+      dados_mun[, c(
+        "CODMUNNASC",
+        "LOCNASC",
+        "IDADEMAE",
+        "ESTCIVMAE",
+        "CODMUNRES",
+        "GESTACAO",
+        "GRAVIDEZ",
+        "PARTO",
+        "SEXO",
+        "APGAR5",
+        "RACACOR",
+        "PESO",
+        "IDANOMAL",
+        "ESCMAE2010",
+        "RACACORMAE",
+        "SEMAGESTAC",
+        "TPAPRESENT",
+        "TPROBSON",
+        "PARIDADE",
+        "KOTELCHUCK",
+        "CONTADOR"
+      )]
+    )
+  )
+  
+  
+  # ---------------------------------------------------------
+  # Informações sobre as gestantes
+  # ---------------------------------------------------------
+  
+  TGI_15 <- sum(
+    dados_mun$IDADEMAE < 15,
+    na.rm = TRUE
+  )
+  
+  TGI_15_19 <- sum(
+    dados_mun$IDADEMAE >= 15 &
+      dados_mun$IDADEMAE <= 19,
+    na.rm = TRUE
+  )
+  
+  TGI_20_24 <- sum(
+    dados_mun$IDADEMAE >= 20 &
+      dados_mun$IDADEMAE <= 24,
+    na.rm = TRUE
+  )
+  
+  TGI_25_29 <- sum(
+    dados_mun$IDADEMAE >= 25 &
+      dados_mun$IDADEMAE <= 29,
+    na.rm = TRUE
+  )
+  
+  TGI_30_34 <- sum(
+    dados_mun$IDADEMAE >= 30 &
+      dados_mun$IDADEMAE <= 34,
+    na.rm = TRUE
+  )
+  
+  TGI_35_39 <- sum(
+    dados_mun$IDADEMAE >= 35 &
+      dados_mun$IDADEMAE <= 39,
+    na.rm = TRUE
+  )
+  
+  TGI_40_44 <- sum(
+    dados_mun$IDADEMAE >= 40 &
+      dados_mun$IDADEMAE <= 44,
+    na.rm = TRUE
+  )
+  
+  TGI_45_49 <- sum(
+    dados_mun$IDADEMAE >= 45 &
+      dados_mun$IDADEMAE <= 49,
+    na.rm = TRUE
+  )
+  
+  TGI_50 <- sum(
+    dados_mun$IDADEMAE >= 50,
+    na.rm = TRUE
+  )
+  
+  TGIF <- sum(
+    dados_mun$IDADEMAE >= 15 &
+      dados_mun$IDADEMAE <= 49,
+    na.rm = TRUE
+  )
+  
+  
+  IM_P25 <- quantile(
+    dados_mun$IDADEMAE,
+    0.25,
+    na.rm = TRUE
+  )
+  
+  IM_P50 <- quantile(
+    dados_mun$IDADEMAE,
+    0.50,
+    na.rm = TRUE
+  )
+  
+  IM_P75 <- quantile(
+    dados_mun$IDADEMAE,
+    0.75,
+    na.rm = TRUE
+  )
+  
+  IM_MD <- mean(
+    dados_mun$IDADEMAE,
+    na.rm = TRUE
+  )
+  
+  IM_DP <- sd(
+    dados_mun$IDADEMAE,
+    na.rm = TRUE
+  )
+  
+  
+  # Escolaridade materna
+  
+  EM_S <- sum(
+    as.character(dados_mun$ESCMAE2010) == "Sem escolaridade",
+    na.rm = TRUE
+  )
+  
+  EM_FI <- sum(
+    as.character(dados_mun$ESCMAE2010) == "Fundamental I",
+    na.rm = TRUE
+  )
+  
+  EM_FII <- sum(
+    as.character(dados_mun$ESCMAE2010) == "Fundamental II",
+    na.rm = TRUE
+  )
+  
+  EM_M <- sum(
+    as.character(dados_mun$ESCMAE2010) == "Médio",
+    na.rm = TRUE
+  )
+  
+  EM_SI <- sum(
+    as.character(dados_mun$ESCMAE2010) == "Superior incompleto",
+    na.rm = TRUE
+  )
+  
+  EM_SC <- sum(
+    as.character(dados_mun$ESCMAE2010) == "Superior completo",
+    na.rm = TRUE
+  )
+  
+  
+  # Raça/cor das gestantes
+  
+  TGRC_B <- sum(
+    as.character(dados_mun$RACACORMAE) == "Branca",
+    na.rm = TRUE
+  )
+  
+  TGRC_PT <- sum(
+    as.character(dados_mun$RACACORMAE) == "Preta",
+    na.rm = TRUE
+  )
+  
+  TGRC_A <- sum(
+    as.character(dados_mun$RACACORMAE) == "Amarela",
+    na.rm = TRUE
+  )
+  
+  TGRC_PD <- sum(
+    as.character(dados_mun$RACACORMAE) == "Parda",
+    na.rm = TRUE
+  )
+  
+  TGRC_I <- sum(
+    as.character(dados_mun$RACACORMAE) == "Indígena",
+    na.rm = TRUE
+  )
+  
+  
+  # Estado civil
+  
+  TGSC <- sum(
+    as.character(dados_mun$ESTCIV) == "Sem companheiro",
+    na.rm = TRUE
+  )
+  
+  TGCC <- sum(
+    as.character(dados_mun$ESTCIV) == "Com companheiro",
+    na.rm = TRUE
+  )
+  
+  
+  # Paridade
+  
+  TGPRI <- sum(
+    as.character(dados_mun$PARIDADE) == "Nulípara",
+    na.rm = TRUE
+  )
+  
+  TGNPRI <- sum(
+    as.character(dados_mun$PARIDADE) == "Multípara",
+    na.rm = TRUE
+  )
+  
+  
+  # ---------------------------------------------------------
+  # Informações sobre as gestações
+  # ---------------------------------------------------------
+  
+  TGU <- sum(
+    as.character(dados_mun$GRAVIDEZ) == "Única",
+    na.rm = TRUE
+  )
+  
+  TGG <- sum(
+    as.character(dados_mun$GRAVIDEZ) %in%
+      c("Dupla", "Tripla ou mais"),
+    na.rm = TRUE
+  )
+  
+  
+  TGD_22 <- sum(
+    dados_mun$SEMAGESTAC < 22,
+    na.rm = TRUE
+  )
+  
+  TGD_22_27 <- sum(
+    dados_mun$SEMAGESTAC >= 22 &
+      dados_mun$SEMAGESTAC <= 27,
+    na.rm = TRUE
+  )
+  
+  TGD_28_31 <- sum(
+    dados_mun$SEMAGESTAC >= 28 &
+      dados_mun$SEMAGESTAC <= 31,
+    na.rm = TRUE
+  )
+  
+  TGD_32_36 <- sum(
+    dados_mun$SEMAGESTAC >= 32 &
+      dados_mun$SEMAGESTAC <= 36,
+    na.rm = TRUE
+  )
+  
+  TGD_37_41 <- sum(
+    dados_mun$SEMAGESTAC >= 37 &
+      dados_mun$SEMAGESTAC <= 41,
+    na.rm = TRUE
+  )
+  
+  TGD_42 <- sum(
+    dados_mun$SEMAGESTAC >= 42,
+    na.rm = TRUE
+  )
+  
+  
+  TGD_PRT <- sum(
+    dados_mun$SEMAGESTAC < 37,
+    na.rm = TRUE
+  )
+  
+  TGD_AT <- sum(
+    dados_mun$SEMAGESTAC >= 37 &
+      dados_mun$SEMAGESTAC <= 41,
+    na.rm = TRUE
+  )
+  
+  TGD_PST <- sum(
+    dados_mun$SEMAGESTAC >= 42,
+    na.rm = TRUE
+  )
+  
+  
+  DG_P25 <- quantile(
+    dados_mun$SEMAGESTAC,
+    0.25,
+    na.rm = TRUE
+  )
+  
+  DG_P50 <- quantile(
+    dados_mun$SEMAGESTAC,
+    0.50,
+    na.rm = TRUE
+  )
+  
+  DG_P75 <- quantile(
+    dados_mun$SEMAGESTAC,
+    0.75,
+    na.rm = TRUE
+  )
+  
+  DG_MD <- mean(
+    dados_mun$SEMAGESTAC,
+    na.rm = TRUE
+  )
+  
+  DG_DP <- sd(
+    dados_mun$SEMAGESTAC,
+    na.rm = TRUE
+  )
+  
+  
+  # Pré-natal
+  
+  TKC_NR <- sum(
+    as.character(dados_mun$KOTELCHUCK) ==
+      "Não realizou pré-natal",
+    na.rm = TRUE
+  )
+  
+  TKC_ID <- sum(
+    as.character(dados_mun$KOTELCHUCK) ==
+      "Inadequado",
+    na.rm = TRUE
+  )
+  
+  TKC_IT <- sum(
+    as.character(dados_mun$KOTELCHUCK) ==
+      "Intermediário",
+    na.rm = TRUE
+  )
+  
+  TKC_AD <- sum(
+    as.character(dados_mun$KOTELCHUCK) ==
+      "Adequado",
+    na.rm = TRUE
+  )
+  
+  TKC_MAD <- sum(
+    as.character(dados_mun$KOTELCHUCK) ==
+      "Mais que adequado",
+    na.rm = TRUE
+  )
+  
+  
+  # ---------------------------------------------------------
+  # Informações sobre o parto
+  # ---------------------------------------------------------
+  
+  TGPRG_S <- sum(
+    as.character(dados_mun$PEREG) == "Sim",
+    na.rm = TRUE
+  )
+  
+  TGPRG_N <- sum(
+    as.character(dados_mun$PEREG) == "Não",
+    na.rm = TRUE
+  )
+  
+  
+  TPV <- sum(
+    as.character(dados_mun$PARTO) == "Vaginal",
+    na.rm = TRUE
+  )
+  
+  TPC <- sum(
+    as.character(dados_mun$PARTO) == "Cesáreo",
+    na.rm = TRUE
+  )
+  
+  
+  TRAP_C <- sum(
+    as.character(dados_mun$TPAPRESENT) == "Cefálico",
+    na.rm = TRUE
+  )
+  
+  TRAP_P <- sum(
+    as.character(dados_mun$TPAPRESENT) ==
+      "Pélvica ou podálica",
+    na.rm = TRUE
+  )
+  
+  TRAP_T <- sum(
+    as.character(dados_mun$TPAPRESENT) == "Transversa",
+    na.rm = TRUE
+  )
+  
+  
+  # Grupos de Robson
+  
+  TGROB_1 <- sum(
+    as.character(dados_mun$TPROBSON) == "Grupo 1",
+    na.rm = TRUE
+  )
+  
+  TGROB_2 <- sum(
+    as.character(dados_mun$TPROBSON) == "Grupo 2",
+    na.rm = TRUE
+  )
+  
+  TGROB_3 <- sum(
+    as.character(dados_mun$TPROBSON) == "Grupo 3",
+    na.rm = TRUE
+  )
+  
+  TGROB_4 <- sum(
+    as.character(dados_mun$TPROBSON) == "Grupo 4",
+    na.rm = TRUE
+  )
+  
+  TGROB_5 <- sum(
+    as.character(dados_mun$TPROBSON) == "Grupo 5",
+    na.rm = TRUE
+  )
+  
+  TGROB_6 <- sum(
+    as.character(dados_mun$TPROBSON) == "Grupo 6",
+    na.rm = TRUE
+  )
+  
+  TGROB_7 <- sum(
+    as.character(dados_mun$TPROBSON) == "Grupo 7",
+    na.rm = TRUE
+  )
+  
+  TGROB_8 <- sum(
+    as.character(dados_mun$TPROBSON) == "Grupo 8",
+    na.rm = TRUE
+  )
+  
+  TGROB_9 <- sum(
+    as.character(dados_mun$TPROBSON) == "Grupo 9",
+    na.rm = TRUE
+  )
+  
+  TGROB_10 <- sum(
+    as.character(dados_mun$TPROBSON) == "Grupo 10",
+    na.rm = TRUE
+  )
+  
+  
+  # Local de nascimento
+  
+  TNLOC_H <- sum(
+    as.character(dados_mun$LOCNASC) == "Hospital",
+    na.rm = TRUE
+  )
+  
+  TNLOC_ES <- sum(
+    as.character(dados_mun$LOCNASC) ==
+      "Outros estabelecimentos de saúde",
+    na.rm = TRUE
+  )
+  
+  TNLOC_D <- sum(
+    as.character(dados_mun$LOCNASC) == "Domicílio",
+    na.rm = TRUE
+  )
+  
+  TNLOC_O <- sum(
+    as.character(dados_mun$LOCNASC) == "Outros",
+    na.rm = TRUE
+  )
+  
+  TNLOC_AI <- sum(
+    as.character(dados_mun$LOCNASC) == "Aldeia indígena",
+    na.rm = TRUE
+  )
+  
+  
+  # ---------------------------------------------------------
+  # Informações sobre os recém-nascidos
+  # ---------------------------------------------------------
+  
+  TRS_M <- sum(
+    as.character(dados_mun$SEXO) == "Masculino",
+    na.rm = TRUE
+  )
+  
+  TRS_F <- sum(
+    as.character(dados_mun$SEXO) == "Feminino",
+    na.rm = TRUE
+  )
+  
+  
+  # Raça/cor
+  
+  TRRC_B <- sum(
+    as.character(dados_mun$RACACOR) == "Branca",
+    na.rm = TRUE
+  )
+  
+  TRRC_PT <- sum(
+    as.character(dados_mun$RACACOR) == "Preta",
+    na.rm = TRUE
+  )
+  
+  TRRC_A <- sum(
+    as.character(dados_mun$RACACOR) == "Amarela",
+    na.rm = TRUE
+  )
+  
+  TRRC_PD <- sum(
+    as.character(dados_mun$RACACOR) == "Parda",
+    na.rm = TRUE
+  )
+  
+  TRRC_I <- sum(
+    as.character(dados_mun$RACACOR) == "Indígena",
+    na.rm = TRUE
+  )
+  
+  
+  # Peso
+  
+  TRP_BP <- sum(
+    as.character(dados_mun$F_PESO) == "Baixo peso",
+    na.rm = TRUE
+  )
+  
+  TRP_N <- sum(
+    as.character(dados_mun$F_PESO) == "Peso normal",
+    na.rm = TRUE
+  )
+  
+  TRP_M <- sum(
+    as.character(dados_mun$F_PESO) == "Macrossomia",
+    na.rm = TRUE
+  )
+  
+  
+  PESO_P25 <- quantile(
+    dados_mun$PESO,
+    0.25,
+    na.rm = TRUE
+  )
+  
+  PESO_P50 <- quantile(
+    dados_mun$PESO,
+    0.50,
+    na.rm = TRUE
+  )
+  
+  PESO_P75 <- quantile(
+    dados_mun$PESO,
+    0.75,
+    na.rm = TRUE
+  )
+  
+  PESO_MD <- mean(
+    dados_mun$PESO,
+    na.rm = TRUE
+  )
+  
+  PESO_DP <- sd(
+    dados_mun$PESO,
+    na.rm = TRUE
+  )
+  
+  
+  # PIG, AIG e GIG
+  # Apenas para gestações únicas
+  
+  TRPIG_P <- sum(
+    as.character(dados_mun$F_PIG) == "PIG",
+    na.rm = TRUE
+  )
+  
+  TRPIG_A <- sum(
+    as.character(dados_mun$F_PIG) == "AIG",
+    na.rm = TRUE
+  )
+  
+  TRPIG_G <- sum(
+    as.character(dados_mun$F_PIG) == "GIG",
+    na.rm = TRUE
+  )
+  
+  
+  # Apgar 5
+  
+  TRAPG5_B <- sum(
+    as.character(dados_mun$F_APGAR5) == "Baixo",
+    na.rm = TRUE
+  )
+  
+  TRAPG5_N <- sum(
+    as.character(dados_mun$F_APGAR5) == "Normal",
+    na.rm = TRUE
+  )
+  
+  APG5_MD <- mean(
+    dados_mun$APGAR5,
+    na.rm = TRUE
+  )
+  
+  APG5_DP <- sd(
+    dados_mun$APGAR5,
+    na.rm = TRUE
+  )
+  
+  
+  # Anomalia congênita
+  
+  TRAC <- sum(
+    as.character(dados_mun$IDANOMAL) == "Sim",
+    na.rm = TRUE
+  )
+  
+  TRSAC <- sum(
+    as.character(dados_mun$IDANOMAL) == "Não",
+    na.rm = TRUE
+  )
+  
+  
+  # ---------------------------------------------------------
+  # Banco final
+  # ---------------------------------------------------------
+  
+  SINASC_SP <- data.frame(
+    ANO = ANO,
+    NIVEL = NIVEL,
+    CODMUNRES = CODMUNRES,
+    TN = TN,
+    TNRC = TNRC,
+    TNRCR = TNRCR,
+    TGI_15 = TGI_15,
+    TGI_15_19 = TGI_15_19,
+    TGI_20_24 = TGI_20_24,
+    TGI_25_29 = TGI_25_29,
+    TGI_30_34 = TGI_30_34,
+    TGI_35_39 = TGI_35_39,
+    TGI_40_44 = TGI_40_44,
+    TGI_45_49 = TGI_45_49,
+    TGI_50 = TGI_50,
+    TGIF = TGIF,
+    IM_P25 = IM_P25,
+    IM_P50 = IM_P50,
+    IM_P75 = IM_P75,
+    IM_MD = IM_MD,
+    IM_DP = IM_DP,
+    EM_S = EM_S,
+    EM_FI = EM_FI,
+    EM_FII = EM_FII,
+    EM_M = EM_M,
+    EM_SI = EM_SI,
+    EM_SC = EM_SC,
+    TGRC_B = TGRC_B,
+    TGRC_PT = TGRC_PT,
+    TGRC_A = TGRC_A,
+    TGRC_PD = TGRC_PD,
+    TGRC_I = TGRC_I,
+    TGSC = TGSC,
+    TGCC = TGCC,
+    TGPRI = TGPRI,
+    TGNPRI = TGNPRI,
+    TGU = TGU,
+    TGG = TGG,
+    TGD_22 = TGD_22,
+    TGD_22_27 = TGD_22_27,
+    TGD_28_31 = TGD_28_31,
+    TGD_32_36 = TGD_32_36,
+    TGD_37_41 = TGD_37_41,
+    TGD_42 = TGD_42,
+    TGD_PRT = TGD_PRT,
+    TGD_AT = TGD_AT,
+    TGD_PST = TGD_PST,
+    DG_P25 = DG_P25,
+    DG_P50 = DG_P50,
+    DG_P75 = DG_P75,
+    DG_MD = DG_MD,
+    DG_DP = DG_DP,
+    TKC_NR = TKC_NR,
+    TKC_ID = TKC_ID,
+    TKC_IT = TKC_IT,
+    TKC_AD = TKC_AD,
+    TKC_MAD = TKC_MAD,
+    TGPRG_S = TGPRG_S,
+    TGPRG_N = TGPRG_N,
+    TPV = TPV,
+    TPC = TPC,
+    TRAP_C = TRAP_C,
+    TRAP_P = TRAP_P,
+    TRAP_T = TRAP_T,
+    TGROB_1 = TGROB_1,
+    TGROB_2 = TGROB_2,
+    TGROB_3 = TGROB_3,
+    TGROB_4 = TGROB_4,
+    TGROB_5 = TGROB_5,
+    TGROB_6 = TGROB_6,
+    TGROB_7 = TGROB_7,
+    TGROB_8 = TGROB_8,
+    TGROB_9 = TGROB_9,
+    TGROB_10 = TGROB_10,
+    TNLOC_H = TNLOC_H,
+    TNLOC_ES = TNLOC_ES,
+    TNLOC_D = TNLOC_D,
+    TNLOC_O = TNLOC_O,
+    TNLOC_AI = TNLOC_AI,
+    TRS_M = TRS_M,
+    TRS_F = TRS_F,
+    TRRC_B = TRRC_B,
+    TRRC_PT = TRRC_PT,
+    TRRC_A = TRRC_A,
+    TRRC_PD = TRRC_PD,
+    TRRC_I = TRRC_I,
+    TRP_BP = TRP_BP,
+    TRP_N = TRP_N,
+    TRP_M = TRP_M,
+    PESO_P25 = PESO_P25,
+    PESO_P50 = PESO_P50,
+    PESO_P75 = PESO_P75,
+    PESO_MD = PESO_MD,
+    PESO_DP = PESO_DP,
+    TRPIG_P = TRPIG_P,
+    TRPIG_A = TRPIG_A,
+    TRPIG_G = TRPIG_G,
+    TRAPG5_B = TRAPG5_B,
+    TRAPG5_N = TRAPG5_N,
+    APG5_MD = APG5_MD,
+    APG5_DP = APG5_DP,
+    TRAC = TRAC,
+    TRSAC = TRSAC
+  )
+  
+  return(SINASC_SP)
+}
+
+
+# Calcular os indicadores para todos os municípios
+SINASC_SP <- do.call(
+  rbind,
+  lapply(municipios, calcular_municipio)
+)
+
+
+# Transformar os nomes das linhas em sequência
+rownames(SINASC_SP) <- NULL
+
+
+# Conferir o banco final
+dim(SINASC_SP)
+head(SINASC_SP)
+View(SINASC_SP)
+
+    
 # Ao terminar a Tarefa 9 commit com a mensagem "script BDEM - SINASC - tarefas 1 a 9" e envie para o repositório Projeto_BDEM_2016
 
 
