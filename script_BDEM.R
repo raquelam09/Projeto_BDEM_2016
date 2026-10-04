@@ -1909,6 +1909,84 @@ head(sidra_4)
 
 # Tarefa 4: Criar um banco de dados, de nome SIDRA_UF.csv (Exemplo: SIDRA_RJ.csv), contendo as variáveis listadas no arquivo “Variáveis - Projeto - Tarefa 4 - SIDRA.pdf”
 
+# Criar as faixas de idade no banco da UF
+sidra_3$FAIXA <- ifelse(sidra_3$F_IDADE %in%
+                          c("0 a 4 anos", "5 a 9 anos", "10 a 14 anos"),
+                        "15",
+                        ifelse(sidra_3$F_IDADE %in%
+                                 c("15 a 19 anos", "20 a 24 anos",
+                                   "25 a 29 anos", "30 a 34 anos",
+                                   "35 a 39 anos", "40 a 44 anos",
+                                   "45 a 49 anos"),
+                               "15_49", "50"))
+
+# Criar as faixas de idade no banco dos municípios
+sidra_4$FAIXA <- ifelse(sidra_4$F_IDADE %in%
+                          c("0 a 4 anos", "5 a 9 anos", "10 a 14 anos"),
+                        "15",
+                        ifelse(sidra_4$F_IDADE %in%
+                                 c("15 a 19 anos", "20 a 24 anos",
+                                   "25 a 29 anos", "30 a 34 anos",
+                                   "35 a 39 anos", "40 a 44 anos",
+                                   "45 a 49 anos"),
+                               "15_49", "50"))
+
+# Somar as faixas de idade da UF
+idade_uf <- aggregate(cbind(POP, POPF) ~ CODMUNRES + FAIXA,
+                      data = sidra_3,
+                      FUN = sum)
+
+# Somar as faixas de idade dos municípios
+idade_mun <- aggregate(cbind(POP, POPF) ~ CODMUNRES + FAIXA,
+                       data = sidra_4,
+                       FUN = sum)
+
+# Transformar as faixas de idade em colunas
+idade_uf <- reshape(idade_uf,
+                    idvar = "CODMUNRES",
+                    timevar = "FAIXA",
+                    direction = "wide")
+
+idade_mun <- reshape(idade_mun,
+                     idvar = "CODMUNRES",
+                     timevar = "FAIXA",
+                     direction = "wide")
+
+# Juntar os bancos de população total, masculina e feminina
+sidra <- merge(sidra_1, sidra_2,
+               by = "CODMUNRES",
+               all.x = TRUE)
+
+# Juntar as informações de idade
+idade <- rbind(idade_uf, idade_mun)
+
+sidra <- merge(sidra, idade,
+               by = "CODMUNRES",
+               all.x = TRUE)
+
+# Criar o ano de referência
+sidra$ANO <- 2016
+
+# Criar o nível da informação
+sidra$NIVEL <- ifelse(sidra$CODMUNRES == 35,
+                      "UF",
+                      "MUNICIPIO")
+
+# Renomear as variáveis de idade
+names(sidra)[names(sidra) == "POP.15"] <- "POPRC_15"
+names(sidra)[names(sidra) == "POP.15_49"] <- "POPRC_15_49"
+names(sidra)[names(sidra) == "POP.50"] <- "POPRC_50"
+
+names(sidra)[names(sidra) == "POPF.15"] <- "POPRC_F_15"
+names(sidra)[names(sidra) == "POPF.15_49"] <- "POPRC_F_15_49"
+names(sidra)[names(sidra) == "POPF.50"] <- "POPRC_F_50"
+
+# Selecionar as variáveis solicitadas
+sidra <- sidra[, c("ANO", "NIVEL", "CODMUNRES",
+                   "POPRE_T", "POPRC_T", "POPRC_M", "POPRC_F",
+                   "POPRC_15", "POPRC_15_49", "POPRC_50",
+                   "POPRC_F_15", "POPRC_F_15_49", "POPRC_F_50")]
+
 # Ao terminar a Tarefa 4 commit com a mensagem "script BDEM - SIDRA - tarefas 1 a 4" e envie para o repositório Projeto_BDEM_2016
 
 
