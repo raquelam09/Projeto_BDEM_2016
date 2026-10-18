@@ -2268,7 +2268,7 @@ linha_uf <- data.frame(
 )
 
 # Juntar a linha estadual com os municípios
-SINISA_SP<- rbind(linha_uf, linha_municipio)
+SINISA_UF<- rbind(linha_uf, linha_municipio)
 
 # Conferir o resultado
 dim(SINISA_UF)
