@@ -2237,6 +2237,12 @@ head(dados_sinisa)
 
 
 # Tarefa 2. Reduzir dados_sinisa apenas para o estado que o aluno irá trabalhar (utilizar os dois primeiros dígitos de CODMUNRES), nomeando este novo banco de dados como dados_sinisa_1
+dados_sinisa_1 <- dados_sinisa[
+  substr(dados_sinisa$CODMUNRES, 1, 2) == "35",]
+
+# Conferir o banco
+dim(dados_sinisa_1)
+head(dados_sinisa_1)
 
 # Ao terminar a Tarefa 2 commit com a mensagem "script BDEM - SINISA - tarefas 1 a 2" e envie para o repositório Projeto_BDEM_2016
 
