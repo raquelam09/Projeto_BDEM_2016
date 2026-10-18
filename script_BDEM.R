@@ -2249,6 +2249,31 @@ head(dados_sinisa_1)
 
 # Tarefa 3. Criar um banco de dados, de nome SINISA_UF.csv (Exemplo: SINISA_RJ.csv), contendo as variáveis listadas no arquivo “Variáveis - Projeto - Tarefa 3 - SINISA.pdf”
 
+# Criar o banco para o nível municipal
+linha_municipio <- data.frame(
+  ANO = dados_sinisa_1$`Ano de Referência`,
+  NIVEL = "MUNICIPIO",
+  CODMUNRES = dados_sinisa_1$CODMUNRES,
+  POPR_RA = dados_sinisa_1$POPR_RA,
+  POPR_RE = dados_sinisa_1$POPR_RE
+)
+
+# Criar a linha para o estado de São Paulo
+linha_uf <- data.frame(
+  ANO = 2016,
+  NIVEL = "UF",
+  CODMUNRES = 35,
+  POPR_RA = sum(dados_sinisa_1$POPR_RA, na.rm = TRUE),
+  POPR_RE = sum(dados_sinisa_1$POPR_RE, na.rm = TRUE)
+)
+
+# Juntar a linha estadual com os municípios
+SINISA_SP<- rbind(linha_uf, linha_municipio)
+
+# Conferir o resultado
+dim(SINISA_UF)
+table(SINISA_UF$NIVEL)
+head(SINISA_UF)
 
 # Ao terminar a Tarefa 3 commit com a mensagem "script BDEM - SINISA - tarefas 1 a 3" e envie para o repositório Projeto_BDEM_2016
 
