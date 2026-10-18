@@ -2012,8 +2012,13 @@ write.csv(sidra, "SIDRA_SP.csv", row.names = FALSE)
 codigos_IBGE_2010 <- read.csv("códigos dos municípios - 2010.csv",
                               sep = ";")
 
-dados_atlas_1 <- read.csv("IDHM - 2010 (CENSO) e 2016 (PNAD) - total e por sexo - UF - Atlas Brasil.csv",
-                          sep = ";", header = TRUE)
+dados_atlas_1 <- read.csv(
+  "IDHM - 2010 (CENSO) e 2016 (PNAD) - total e por sexo - UF - Atlas Brasil.csv",
+  sep = ";",
+  fileEncoding = "Latin1",
+  stringsAsFactors = FALSE,
+  check.names = FALSE
+)
 
 dados_atlas_2 <- read.csv("IDHM - 2010 - municípios - Atlas Brasil.csv",
                           sep = ";", header = TRUE)
@@ -2036,24 +2041,6 @@ dim(dados_atlas_2)
 # Tarefa 2: Manipular o banco de dados e criar o banco de dados ATLAS_UF
 
 # Criar o banco UF_codigo tipo tabela de correspondência
-UF_codigo = data.frame(
-  UF = c("Rondônia","Acre","Amazonas","Roraima","Pará","Amapá","Tocantins",
-         "Maranhão","Piauí","Ceará","Rio Grande do Norte","Paraíba",
-         "Pernambuco","Alagoas","Sergipe","Bahia","Minas Gerais",
-         "Espírito Santo","Rio de Janeiro","São Paulo","Paraná",
-         "Santa Catarina","Rio Grande do Sul","Mato Grosso do Sul",
-         "Mato Grosso","Goiás","Distrito Federal"),
-  
-  SIGLA = c("RO","AC","AM","RR","PA","AP","TO",
-            "MA","PI","CE","RN","PB","PE","AL",
-            "SE","BA","MG","ES","RJ","SP",
-            "PR","SC","RS","MS","MT","GO","DF"),
-  
-  CODUF = c(11,12,13,14,15,16,17,
-            21,22,23,24,25,26,27,
-            28,29,31,32,33,35,
-            41,42,43,50,51,52,53)
-)
 
 # Retirar de dados_atlas_1 a linha do Brasil e adicionar (com merge by UF) as colunas de UF_codigo
 
@@ -2082,6 +2069,121 @@ UF_codigo = data.frame(
 
 # Criar banco final ATLAS_UF "juntando" os bancos linha_estado e ATLAS_MUNICIPIO
 
+# 1. Criar a tabela de correspondência das UFs
+UF_codigo <- data.frame(
+  UF = c("Acre", "Alagoas", "Amapá", "Amazonas", "Bahia",
+         "Ceará", "Distrito Federal", "Espírito Santo", "Goiás",
+         "Maranhão", "Mato Grosso", "Mato Grosso do Sul",
+         "Minas Gerais", "Pará", "Paraíba", "Paraná",
+         "Pernambuco", "Piauí", "Rio de Janeiro",
+         "Rio Grande do Norte", "Rio Grande do Sul",
+         "Rondônia", "Roraima", "Santa Catarina",
+         "São Paulo", "Sergipe", "Tocantins"),
+  SIGLA = c("AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES",
+            "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR",
+            "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC",
+            "SP", "SE", "TO"),
+  CODUF = c("12", "27", "16", "13", "29", "23", "53", "32",
+            "52", "21", "51", "50", "31", "15", "25", "41",
+            "26", "22", "33", "24", "43", "11", "14", "42",
+            "35", "28", "17"),
+  stringsAsFactors = FALSE
+)
+
+# 2. Preparar dados_atlas_1
+dados_atlas_1 <- dados_atlas_1[
+  dados_atlas_1$UF != "Brasil", 
+]
+
+dados_atlas_1 <- merge(
+  dados_atlas_1,
+  UF_codigo,
+  by = "UF"
+)
+
+# 3. Criar a linha referente ao estado
+linha_estado <- data.frame(
+  ANO = 2016,
+  NIVEL = "UF",
+  CODMUNRES = as.numeric(dados_atlas_1$CODUF),
+  IDHM_A = dados_atlas_1$IDHM_2016,
+  IDHM_CA = dados_atlas_1$IDHM_2010,
+  IDHM_CA_M = dados_atlas_1$IDHM_2010_M,
+  IDHM_CA_F = dados_atlas_1$IDHM_2010_F
+)
+
+linha_estado <- linha_estado[linha_estado$CODMUNRES == 35, ]
+
+# 4. Preparar dados_atlas_2
+# Extrair a sigla do estado dos parênteses
+dados_atlas_2$UF <- toupper(sub(
+  ".*\\(([^()]*)\\)$",
+  "\\1",
+  dados_atlas_2$município
+))
+
+# Remover a sigla entre parênteses do nome do município
+dados_atlas_2$município <- trimws(sub(
+  "\\s*\\([^()]*\\)$",
+  "",
+  dados_atlas_2$município
+))
+
+# 5. Preparar os códigos dos municípios do IBGE
+codigos_IBGE_2010$CODMUNRES <- as.character(
+  codigos_IBGE_2010$CODMUNRES
+)
+
+codigos_IBGE_2010$CODUF <- substr(
+  codigos_IBGE_2010$CODMUNRES,
+  1, 2
+)
+
+# Manter somente as colunas originais necessárias
+codigos_IBGE_2010 <- codigos_IBGE_2010[
+  , c("CODUF", "município", "CODMUNRES")
+]
+
+# Adicionar a sigla e o nome de cada estado
+codigos_IBGE_2010 <- merge(
+  codigos_IBGE_2010,
+  UF_codigo,
+  by = "CODUF"
+)
+
+# 6. Cruzar os dados do Atlas com os códigos do IBGE
+atlas_municipio <- merge(
+  dados_atlas_2,
+  codigos_IBGE_2010,
+  by.x = c("município", "UF"),
+  by.y = c("município", "SIGLA")
+)
+
+# 7. Selecionar apenas os municípios de São Paulo
+atlas_municipio <- atlas_municipio[
+  substr(atlas_municipio$CODMUNRES, 1, 2) == "35",
+]
+
+# Conferir se o cruzamento funcionou
+print(nrow(atlas_municipio))
+print(head(atlas_municipio))
+
+# 8. Criar o banco ATLAS_MUNICIPIO
+ATLAS_MUNICIPIO <- data.frame(
+  ANO = rep(2016, nrow(atlas_municipio)),
+  NIVEL = rep("MUNICIPIO", nrow(atlas_municipio)),
+  CODMUNRES = as.numeric(atlas_municipio$CODMUNRES),
+  IDHM_A = rep(NA_real_, nrow(atlas_municipio)),
+  IDHM_CA = atlas_municipio$IDHM_2010,
+  IDHM_CA_M = rep(NA_real_, nrow(atlas_municipio)),
+  IDHM_CA_F = rep(NA_real_, nrow(atlas_municipio))
+)
+
+# 9. Juntar estado e municípios
+ATLAS_UF <- rbind(
+  linha_estado,
+  ATLAS_MUNICIPIO
+)
 
 # Ao terminar a Tarefa 2 commit com a mensagem "script BDEM - ATLAS - tarefas 1 a 2" e envie para o repositório Projeto_BDEM_2016
 
