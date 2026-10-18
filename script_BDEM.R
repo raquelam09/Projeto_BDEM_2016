@@ -2209,6 +2209,26 @@ write.csv(
 # dados_sinisa para agua e esgoto - município - 2016.csv
 # Atenção que o arquivo tem códigos e nomes de municípios e muitos NAs. 
 # Repare que os valores estão com o milhar indicado por ponto, o que não deve acontecer para o R não entender como decimal
+# Verificar se a leitura de todos os bancos foi feita corretamente e a estrutura dos dados
+# Remover a pontuação de milhar e converter para formato numérico
+
+dados_sinisa <- read.csv(
+  "agua e esgoto - município - 2016.csv",
+  sep = ";",
+  dec = ",",
+  na.strings = c("NA", ""),
+  stringsAsFactors = FALSE,
+  check.names = FALSE,
+  fileEncoding = "Latin1"
+)
+# Retirar o ponto usado como separador de milhar
+dados_sinisa$POPR_RA <- as.numeric(gsub("\\.", "", dados_sinisa$POPR_RA))
+dados_sinisa$POPR_RE <- as.numeric(gsub("\\.", "", dados_sinisa$POPR_RE))
+
+# Conferir o banco
+dim(dados_sinisa)
+str(dados_sinisa)
+head(dados_sinisa)
 
 # Verificar se a leitura de todos os bancos foi feita corretamente e a estrutura dos dados
 # Remover a pontuação de milhar e converter para formato numérico
