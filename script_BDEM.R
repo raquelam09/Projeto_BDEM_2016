@@ -2513,6 +2513,20 @@ table(BDEM_SP$NIVEL)
 # Ao terminar a Tarefa 2 commit com a mensagem "script BDEM - BDEM - tarefas 1 a 2" e envie para o repositório Projeto_BDEM_2016
 
 # Tarefa 3: Exportar o banco de dados com o nome BDEM_UF.csv (Exemplo: BDEM_RJ.csv)
-write.csv(BDEM_SP, "BDEM_SP.csv", row.names = FALSE)
+# Colocar a UF na primeira linha
+BDEM_SP <- BDEM_SP[c(
+  which(BDEM_SP$NIVEL == "UF"),
+  which(BDEM_SP$NIVEL != "UF")
+), ]
+
+# Conferir
+head(BDEM_SP[, c("CODMUNRES", "NIVEL")])
+
+# Exportar o banco
+write.csv2(
+  BDEM_SP,
+  "BDEM_SP.csv",
+  row.names = FALSE
+)
 # Ao terminar a Tarefa 3 commit com o comentário "dados BDEM_UF 2016 e script - BDEM - tarefas 1 a 3"  e enviar para o repositório Projeto_BDEM_2016
  
