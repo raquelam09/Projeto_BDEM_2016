@@ -189,6 +189,8 @@ calcular_municipio <- function(municipio) {
   
   
   # Identificadores
+  ANO <- 2016
+  NIVEL <- "MUNICIPIO"
   CODMUNRES <- as.character(municipio)
   
   
@@ -2152,6 +2154,10 @@ codigos_IBGE_2010 <- merge(
 )
 
 # 6. Cruzar os dados do Atlas com os códigos do IBGE
+# Padronizar o nome do município para cruzar com o IBGE
+dados_atlas_2$município[
+  dados_atlas_2$município == "Mogi Mirim"
+] <- "Moji Mirim"
 atlas_municipio <- merge(
   dados_atlas_2,
   codigos_IBGE_2010,
@@ -2299,11 +2305,70 @@ write.csv(
 
 # Tarefa 1: Agregar os arquivos SIDRA_UF, ATLAS_UF, SINASC_UF, SIM_UF, SINISA_UF no banco BDEM_UF (Exemplo: BDEM_RJ)
 # Leitura dos 5 bancos de dados expeortados das etapas anteriores
-
 # Agregação dos bancos
 # Lembre-se que SIDRA e ATLAS tem CODMUNRES com 7 dígitos e SINASC, SIM e SINISA com 6 dígitos
 # Além disso dentro do merge all = TRUE garante a manutenção de qualquer município presente em um dos bancos envolvidos no merge
+ATLAS_UF <- read.csv("ATLAS_SP.csv", stringsAsFactors = FALSE)
+SINISA_UF <- read.csv("SINISA_SP.csv", stringsAsFactors = FALSE)
+# Criar cópias para a agregação
+SIM_ag <- SIM_SP
+SINASC_ag <- SINASC_SP
+SIDRA_ag <- SIDRA_SP
+ATLAS_ag <- ATLAS_UF
+SINISA_ag <- SINISA_UF
 
+# Padronizar os códigos para texto
+padronizar_codigos <- function(base) {
+  base$CODMUNRES <- as.character(base$CODMUNRES)
+  
+  # Padronizar somente os códigos municipais
+  idx <- base$NIVEL == "MUNICIPIO"
+  base$CODMUNRES[idx] <- substr(base$CODMUNRES[idx], 1, 6)
+  
+  base
+}
+
+SIM_ag <- padronizar_codigos(SIM_ag)
+SINASC_ag <- padronizar_codigos(SINASC_ag)
+SIDRA_ag <- padronizar_codigos(SIDRA_ag)
+ATLAS_ag <- padronizar_codigos(ATLAS_ag)
+SINISA_ag <- padronizar_codigos(SINISA_ag)
+
+# Agregar os bancos
+
+BDEM_SP <- merge(
+  SIM_ag,
+  SINASC_ag,
+  by = c("ANO", "NIVEL", "CODMUNRES"),
+  all = TRUE
+)
+
+BDEM_SP <- merge(
+  BDEM_SP,
+  SIDRA_ag,
+  by = c("ANO", "NIVEL", "CODMUNRES"),
+  all = TRUE
+)
+
+BDEM_SP <- merge(
+  BDEM_SP,
+  ATLAS_ag,
+  by = c("ANO", "NIVEL", "CODMUNRES"),
+  all = TRUE
+)
+
+BDEM_SP <- merge(
+  BDEM_SP,
+  SINISA_ag,
+  by = c("ANO", "NIVEL", "CODMUNRES"),
+  all = TRUE
+)
+
+dim(BDEM_SP)
+
+table(BDEM_SP$NIVEL, useNA = "ifany")
+
+sum(duplicated(BDEM_SP[c("ANO", "NIVEL", "CODMUNRES")]))
 
 # Ao terminar a Tarefa 1 commit com a mensagem "script BDEM - BDEM - tarefa 1" e envie para o repositório Projeto_BDEM_2016
 
