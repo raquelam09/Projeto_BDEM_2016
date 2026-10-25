@@ -2386,6 +2386,128 @@ sum(duplicated(BDEM_SP[c("ANO", "NIVEL", "CODMUNRES")]))
 
 # Conferir o banco BDEM_UF após inserção dos indicadores
 
+# Conferir as variáveis do BDEM_SP
+names(BDEM_SP)
+
+# Conferir a estrutura do banco
+str(BDEM_SP)
+
+# Verificar as colunas relacionadas aos indicadores
+grep(
+  "TO|TN|POP|NASC|MATERN|NEONATAL|FECUND",
+  names(BDEM_SP),
+  value = TRUE,
+  ignore.case = TRUE
+)
+
+# Excluir o código especial antes de somar
+SIM_mun <- SIM_SP[SIM_SP$CODMUNRES != "350000", ]
+SINASC_mun <- SINASC_SP[SINASC_SP$CODMUNRES != "350000", ]
+
+# Totais de óbitos
+colSums(
+  SIM_mun[, c("TO", "TO_MT", "TO_MT_42",
+              "TO_NT", "TO_NT_P", "TO_NT_T")],
+  na.rm = TRUE
+)
+
+# Totais de nascimentos
+colSums(
+  SINASC_mun[, c("TN", "TGIF")],
+  na.rm = TRUE
+)
+
+# Óbitos por idade e causa
+colSums(
+  SIM_mun[, c("TO_NN", "TO_N", "TO_F_IF")],
+  na.rm = TRUE
+)
+
+# Conferir população e nascimentos na linha UF
+BDEM_SP[BDEM_SP$NIVEL == "UF",
+        c("POPRC_T", "POPRC_F_15_49", "TN", "TGIF")]
+
+# Totais estaduais, excluindo o código especial
+total_obitos <- sum(SIM_mun$TO, na.rm = TRUE)
+obitos_maternos <- sum(SIM_mun$TO_MT, na.rm = TRUE)
+obitos_maternos_42 <- sum(SIM_mun$TO_MT_P, na.rm = TRUE)
+obitos_neonatais <- sum(SIM_mun$TO_NT, na.rm = TRUE)
+obitos_neonatais_precoces <- sum(SIM_mun$TO_NT_P, na.rm = TRUE)
+obitos_neonatais_tardios <- sum(SIM_mun$TO_NT_T, na.rm = TRUE)
+
+total_nascimentos <- sum(SINASC_mun$TN, na.rm = TRUE)
+nascimentos_mulheres_15_49 <- sum(SINASC_mun$TGIF, na.rm = TRUE)
+
+# População estadual
+pop_total <- BDEM_SP$POPRC_T[BDEM_SP$NIVEL == "UF"][1]
+pop_mulheres_15_49 <- BDEM_SP$POPRC_F_15_49[
+  BDEM_SP$NIVEL == "UF"
+][1]
+
+# Indicadores estaduais
+TFG <- nascimentos_mulheres_15_49 / pop_mulheres_15_49 * 1000
+TMG <- total_obitos / pop_total * 1000
+RMM <- obitos_maternos / total_nascimentos * 100000
+TMM <- obitos_maternos / pop_total * 100000
+TMM_P <- obitos_maternos_42 / pop_total * 100000
+TMN <- obitos_neonatais / total_nascimentos * 1000
+TMN_P <- obitos_neonatais_precoces / total_nascimentos * 1000
+TMN_T <- obitos_neonatais_tardios / total_nascimentos * 1000
+
+# Inserir os indicadores na linha UF
+linha_UF <- which(BDEM_SP$NIVEL == "UF")
+
+BDEM_SP$TFG <- NA_real_
+BDEM_SP$TMG <- NA_real_
+BDEM_SP$RMM <- NA_real_
+BDEM_SP$TMM <- NA_real_
+BDEM_SP$TMM_P <- NA_real_
+BDEM_SP$TMN <- NA_real_
+BDEM_SP$TMN_P <- NA_real_
+BDEM_SP$TMN_T <- NA_real_
+BDEM_SP$TMI <- NA_real_
+
+BDEM_SP[linha_UF, "TFG"] <- round(TFG, 2)
+BDEM_SP[linha_UF, "TMG"] <- round(TMG, 2)
+BDEM_SP[linha_UF, "RMM"] <- round(RMM, 2)
+BDEM_SP[linha_UF, "TMM"] <- round(TMM, 2)
+BDEM_SP[linha_UF, "TMM_P"] <- round(TMM_P, 2)
+BDEM_SP[linha_UF, "TMN"] <- round(TMN, 2)
+BDEM_SP[linha_UF, "TMN_P"] <- round(TMN_P, 2)
+BDEM_SP[linha_UF, "TMN_T"] <- round(TMN_T, 2)
+
+# Conferir se existe uma variável de óbitos pós-neonatais
+grep("TO_PNT|TO_NT|TO_MI|TO_TMI",
+     names(BDEM_SP), value = TRUE)
+
+# Conferir o banco após a inserção
+BDEM_SP[BDEM_SP$NIVEL == "UF",
+        c("ANO", "NIVEL", "CODMUNRES",
+          "TFG", "TMG", "RMM", "TMM", "TMM_P",
+          "TMN", "TMN_P", "TMN_T", "TMI")]
+
+# Conferir a estrutura e os nomes das novas colunas
+str(BDEM_SP)
+tail(names(BDEM_SP), 9)
+
+# Conferir o total de óbitos pós-neonatais
+sum(SIM_mun$TO_PNT, na.rm = TRUE)
+
+# Total de óbitos infantis (neonatais + pós-neonatais)
+obitos_infantis <- sum(SIM_mun$TO_NT, na.rm = TRUE) +
+  sum(SIM_mun$TO_PNT, na.rm = TRUE)
+
+# Taxa de mortalidade infantil por 1.000 nascidos vivos
+TMI <- obitos_infantis / total_nascimentos * 1000
+
+# Inserir o TMI na linha UF
+BDEM_SP[linha_UF, "TMI"] <- round(TMI, 2)
+
+# Conferir os nove indicadores
+BDEM_SP[BDEM_SP$NIVEL == "UF",
+        c("TFG", "TMG", "RMM", "TMM", "TMM_P",
+          "TMN", "TMN_P", "TMN_T", "TMI")]
+
 # Ao terminar a Tarefa 2 commit com a mensagem "script BDEM - BDEM - tarefas 1 a 2" e envie para o repositório Projeto_BDEM_2016
 
 
